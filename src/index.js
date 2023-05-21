@@ -1,9 +1,11 @@
-import { SearchControl, Spinner } from "@wordpress/components";
+import { Button, TerxtControl, SearchControl, Spinner } from "@wordpress/components";
 import { useState, render } from "@wordpress/element";
 import { useSelect } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
 import { decodeEntities } from "@wordpress/html-entities";
 
+
+// TODO: rename this
 function MyFirstApp() {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -40,6 +42,15 @@ function MyFirstApp() {
   );
 }
 
+
+const PageEditButton = () => (
+    <Button variant="primary">
+        Edit
+    </Button>
+);
+
+
+
 function PageList({ hasResolved, pages }) {
   if (!hasResolved) {
     return <Spinner />;
@@ -53,19 +64,23 @@ function PageList({ hasResolved, pages }) {
     <table className="wp-list-table widefat fixed striped table-view-list">
       <thead>
         <tr>
-          <th>Title</th>
+          <td>Title</td>
+          <td style={{ width: 120}}>Actions</td>
         </tr>
       </thead>
       <tbody>
         {pages?.map((page) => (
           <tr key={page.id}>
             <td>{decodeEntities(page.title.rendered)}</td>
+            <td><PageEditButton pageId={ page.id } /></td>
           </tr>
         ))}
       </tbody>
     </table>
   );
 }
+
+
 
 window.addEventListener(
   "load",

@@ -9,6 +9,9 @@ It does the following:
 * Builds a option page
 * Uses React & JSX
 * Using the `wp.data` object in devtools
+* Retrieving data from the WP store `@wordpress/core-data`, versus the API
+* Using `@wordpress/components` like the search bar, the spinner
+* Using `@
 
 
 ## Notes
