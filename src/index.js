@@ -45,29 +45,29 @@ export function EditPageForm({ pageId, onCancel, onSaveFinished }) {
   // 2 - create a 'edit' state.
   // 3 - create a 'save the edit' state
 
-  // get the content
-  //   const page = useSelect((select) => select(coreDataStore).getEditedEntityRecord("postType", "page", pageId), [pageId]);
-
   // get the content and any errors involved
-  const { lastError, page } = useSelect(
+  const { isSaving, hasEdits, lastError, page } = useSelect(
     (select) => ({
-      page: select(coreDataStore).getEditedEntityRecord("postType", "page", pageId),
-      lastError: select(coreDataStore).getLastEntitySaveError("postType", "page", pageId),
+        page: select(coreDataStore).getEditedEntityRecord("postType", "page", pageId),
+        lastError: select(coreDataStore).getLastEntitySaveError("postType", "page", pageId),
+        isSaving: select(coreDataStore).isSavingEntityRecord("postType", "page", pageId),
+        hasEdits: select(coreDataStore).hasEditsForEntityRecord("postType", "page", pageId),
     }),
     [pageId]
   );
 
+
+
+  const { saveEditedEntityRecord, editEntityRecord } = useDispatch(coreDataStore);
+
   // Make the edits
-  const { editEntityRecord } = useDispatch(coreDataStore);
   const handleChange = (title) => editEntityRecord("postType", "page", pageId, { title });
 
-  // save the edits
-  const { saveEditedEntityRecord } = useDispatch(coreDataStore);
+    // save the edits
   const handleSave = async () => {
-    const updatedRecord = await saveEditedEntityRecord("postType", "page", pageId);
-
-    if (updatedRecord) {
-      onSaveFinished();
+    const savedRecord = await saveEditedEntityRecord("postType", "page", pageId);
+    if (savedRecord) {
+        onSaveFinished();
     }
   };
 
@@ -75,12 +75,16 @@ export function EditPageForm({ pageId, onCancel, onSaveFinished }) {
     <div className="my-gutenberg-form">
       <TextControl label="Page title:" value={page.title} onChange={handleChange} />
 
-      <>{lastError ? 
-      <div className="form-error">Error: {lastError.message}</div> : false}</>
+      <>{lastError ? <div className="form-error">Error: {lastError.message}</div> : false}</>
 
       <div className="form-buttons">
-        <Button onClick={handleSave} variant="primary">
-          Save
+        <Button onClick={handleSave} variant="primary" disabled={!hasEdits || isSaving}>
+          {isSaving ? (
+            <>
+              <Spinner />
+              Saving...
+            </>
+          ) : 'Save' }
         </Button>
         <Button onClick={onCancel} variant="tertiary">
           Cancel
@@ -104,7 +108,7 @@ function PageEditButton({ pageId }) {
       </Button>
       {isOpen && (
         <Modal onRequestClose={closeModal} title="Edit page">
-          <EditPageForm pageId={pageId} onCancel={closeModal} onSaveFinish={closeModal} />
+          <EditPageForm pageId={pageId} onCancel={closeModal} onSaveFinished={closeModal} />
         </Modal>
       )}
     </>
