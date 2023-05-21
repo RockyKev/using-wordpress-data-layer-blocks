@@ -8,4 +8,4 @@ It does the following:
 * Uses wordpress-scripts
 * Builds a option page
 * Uses React & JSX
-* 
+* Using the `wp.data` object in devtools

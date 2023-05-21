@@ -32,7 +32,7 @@ function my_admin_menu() {
     );
 };
 
-add_action( 'admin_menu', 'my_admin_menu');
+add_action('admin_menu', 'my_admin_menu');
 
 
 function load_custom_wp_admin_scripts($hook) {
@@ -47,13 +47,13 @@ function load_custom_wp_admin_scripts($hook) {
 
     // Enqueue CSS Dependencies
     foreach ($asset_file['dependencies'] as $style) {
-        wp_enqueue_style( $style );
+        wp_enqueue_style($style);
     }
 
     // Load our app.js
     wp_enqueue_script(
         'my-first-gutenberg-app',
-        plugins_url('build/index.js', __FILE__), 
+        plugins_url('build/index.js', __FILE__),
         $asset_file['dependencies'],
         $asset_file['version']
     );
@@ -68,4 +68,3 @@ function load_custom_wp_admin_scripts($hook) {
 };
 
 add_action('admin_enqueue_scripts', 'load_custom_wp_admin_scripts');
-
