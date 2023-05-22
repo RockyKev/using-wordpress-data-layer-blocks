@@ -33,10 +33,41 @@ function MyFirstApp() {
   // the markup
   return (
     <div>
-      <SearchControl onChange={setSearchTerm} value={searchTerm} />
+      <div className="list-controls">
+        <SearchControl onChange={setSearchTerm} value={searchTerm} />
+        <CreatePageButton />
+      </div>
       <PageList hasResolved={hasResolved} pages={pages} />
     </div>
   );
+}
+
+function CreatePageButton() {
+  const [isOpen, setOpen] = useState(false);
+  const openModal = () => setOpen(true);
+  const closeModal = () => setOpen(false);
+
+  return (
+    <>
+      <Button onClick={openModal} variant="primary">
+        Create a New Page
+      </Button>
+
+      {isOpen && (
+        <Modal onRequestClose={closeModal} title="Create a new page">
+          <CreatePageForm onCancel={closeModal} onSaveFinish={closeModal} />
+        </Modal>
+      )}
+    </>
+  );
+}
+
+function CreatePageForm() {
+
+    const [title, setTitle ] = useState();
+    const handleChange = (title) => setTitle(title);
+    
+    return <div />;
 }
 
 export function EditPageForm({ pageId, onCancel, onSaveFinished }) {
@@ -48,43 +79,57 @@ export function EditPageForm({ pageId, onCancel, onSaveFinished }) {
   // get the content and any errors involved
   const { isSaving, hasEdits, lastError, page } = useSelect(
     (select) => ({
-        page: select(coreDataStore).getEditedEntityRecord("postType", "page", pageId),
-        lastError: select(coreDataStore).getLastEntitySaveError("postType", "page", pageId),
-        isSaving: select(coreDataStore).isSavingEntityRecord("postType", "page", pageId),
-        hasEdits: select(coreDataStore).hasEditsForEntityRecord("postType", "page", pageId),
+      page: select(coreDataStore).getEditedEntityRecord("postType", "page", pageId),
+      lastError: select(coreDataStore).getLastEntitySaveError("postType", "page", pageId),
+      isSaving: select(coreDataStore).isSavingEntityRecord("postType", "page", pageId),
+      hasEdits: select(coreDataStore).hasEditsForEntityRecord("postType", "page", pageId),
     }),
     [pageId]
   );
-
-
 
   const { saveEditedEntityRecord, editEntityRecord } = useDispatch(coreDataStore);
 
   // Make the edits
   const handleChange = (title) => editEntityRecord("postType", "page", pageId, { title });
 
-    // save the edits
+  // save the edits
   const handleSave = async () => {
     const savedRecord = await saveEditedEntityRecord("postType", "page", pageId);
     if (savedRecord) {
-        onSaveFinished();
+      onSaveFinished();
     }
   };
 
   return (
+    <PageForm
+      title={page.title}
+      onChangeTitle={handleChange}
+      hasEdits={hasEdits}
+      lastError={lastError}
+      isSaving={isSaving}
+      onCancel={onCancel}
+      onSave={handleSave}
+    />
+  );
+}
+
+export function PageForm({ title, onChangeTitle, hasEdits, lastError, isSaving, onCancel, onSave }) {
+  return (
     <div className="my-gutenberg-form">
-      <TextControl label="Page title:" value={page.title} onChange={handleChange} />
+      <TextControl label="Page title:" value={title} onChange={onChangeTitle} />
 
       <>{lastError ? <div className="form-error">Error: {lastError.message}</div> : false}</>
 
       <div className="form-buttons">
-        <Button onClick={handleSave} variant="primary" disabled={!hasEdits || isSaving}>
+        <Button onClick={onSave} variant="primary" disabled={!hasEdits || isSaving}>
           {isSaving ? (
             <>
               <Spinner />
               Saving...
             </>
-          ) : 'Save' }
+          ) : (
+            "Save"
+          )}
         </Button>
         <Button onClick={onCancel} variant="tertiary">
           Cancel
@@ -93,8 +138,6 @@ export function EditPageForm({ pageId, onCancel, onSaveFinished }) {
     </div>
   );
 }
-
-// const PageEditButton = () => <Button variant="primary">Edit</Button>;
 
 function PageEditButton({ pageId }) {
   const [isOpen, setOpen] = useState(false);
