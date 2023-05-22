@@ -128,7 +128,8 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EditPageForm: () => (/* binding */ EditPageForm)
+/* harmony export */   EditPageForm: () => (/* binding */ EditPageForm),
+/* harmony export */   PageForm: () => (/* binding */ PageForm)
 /* harmony export */ });
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
@@ -171,20 +172,72 @@ function MyFirstApp() {
   }, [searchTerm]);
 
   // the markup
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SearchControl, {
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "list-controls"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SearchControl, {
     onChange: setSearchTerm,
     value: searchTerm
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(PageList, {
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(CreatePageButton, null)), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(PageList, {
     hasResolved: hasResolved,
     pages: pages
   }));
 }
-function EditPageForm(_ref) {
+function CreatePageButton() {
+  const [isOpen, setOpen] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const openModal = () => setOpen(true);
+  const closeModal = () => setOpen(false);
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+    onClick: openModal,
+    variant: "primary"
+  }, "Create a New Page"), isOpen && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Modal, {
+    onRequestClose: closeModal,
+    title: "Create a new page"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(CreatePageForm, {
+    onCancel: closeModal,
+    onSaveFinished: closeModal
+  })));
+}
+function CreatePageForm(_ref) {
+  let {
+    onSaveFinished,
+    onCancel
+  } = _ref;
+  const [title, setTitle] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)();
+  const {
+    lastError,
+    isSaving
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => ({
+    lastError: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_3__.store).getLastEntitySaveError("postType", "page"),
+    isSaving: select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_3__.store).isSavingEntityRecord("postType", "page")
+  }), []);
+  const {
+    saveEntityRecord
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useDispatch)(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_3__.store);
+  const handleSave = async () => {
+    const savedRecord = await saveEntityRecord("postType", "page", {
+      title,
+      status: "publish"
+    });
+    if (savedRecord) {
+      onSaveFinished();
+    }
+  };
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(PageForm, {
+    title: title,
+    onChangeTitle: setTitle,
+    hasEdits: !!title,
+    onSave: handleSave,
+    onCancel: onCancel,
+    lastError: lastError,
+    isSaving: isSaving
+  });
+}
+function EditPageForm(_ref2) {
   let {
     pageId,
     onCancel,
     onSaveFinished
-  } = _ref;
+  } = _ref2;
   // three steps
   // 1 - get the content
   // 2 - create a 'edit' state.
@@ -219,32 +272,49 @@ function EditPageForm(_ref) {
       onSaveFinished();
     }
   };
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(PageForm, {
+    title: page.title,
+    onChangeTitle: handleChange,
+    hasEdits: hasEdits,
+    lastError: lastError,
+    isSaving: isSaving,
+    onCancel: onCancel,
+    onSave: handleSave
+  });
+}
+function PageForm(_ref3) {
+  let {
+    title,
+    onChangeTitle,
+    hasEdits,
+    lastError,
+    isSaving,
+    onCancel,
+    onSave
+  } = _ref3;
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "my-gutenberg-form"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
     label: "Page title:",
-    value: page.title,
-    onChange: handleChange
+    value: title,
+    onChange: onChangeTitle
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, lastError ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "form-error"
   }, "Error: ", lastError.message) : false), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "form-buttons"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-    onClick: handleSave,
+    onClick: onSave,
     variant: "primary",
     disabled: !hasEdits || isSaving
-  }, isSaving ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, null), "Saving...") : 'Save'), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+  }, isSaving ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, null), "Saving...") : "Save"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
     onClick: onCancel,
     variant: "tertiary"
   }, "Cancel")));
 }
-
-// const PageEditButton = () => <Button variant="primary">Edit</Button>;
-
-function PageEditButton(_ref2) {
+function PageEditButton(_ref4) {
   let {
     pageId
-  } = _ref2;
+  } = _ref4;
   const [isOpen, setOpen] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const openModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
@@ -260,11 +330,11 @@ function PageEditButton(_ref2) {
     onSaveFinished: closeModal
   })));
 }
-function PageList(_ref3) {
+function PageList(_ref5) {
   let {
     hasResolved,
     pages
-  } = _ref3;
+  } = _ref5;
   if (!hasResolved) {
     return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, null);
   }

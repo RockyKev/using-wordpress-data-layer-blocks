@@ -7,22 +7,28 @@ This plugin walks you through the data layer of WordPress using Blocks and JSX.
 It does the following: 
 
 Setting up the environment - 
+
 * Uses wordpress-scripts
 * Builds a option page
 * Uses React & JSX
 
 Retrieving WP data records
+
 * Using the `wp.data` object in devtools
 * Retrieving data from the WP store `@wordpress/core-data`, versus the API
 * Using `@wordpress/components` like the search bar, the spinner
 * Using `getEntityRecord` within the `wp.data.select('core')` data object.
 
 Editing the WP data records
+
 * Using `wp.data.dispatch('core').editEntityRecord` over `useState`
 * Using `wp.data.dispatch('core').saveEditedEntityRecord` over `useState`
 * Using `wp.data.select('core').getEditedEntityRecord` to see the changes
 * Using `getLastEntitySaveError` for error checking
 
+Creating new WP data records
+
+* Using React `useState` for any brand new records (as opposed to editNewEntryRecord)
 
 ## Notes
 
