@@ -1,8 +1,9 @@
-import { Button, TextControl, Modal, SearchControl, Spinner } from "@wordpress/components";
+import { Button, TextControl, Modal, SearchControl, Spinner, SnackbarList } from "@wordpress/components";
 import { useState, render } from "@wordpress/element";
 import { useSelect, useDispatch } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
 import { decodeEntities } from "@wordpress/html-entities";
+import { store as noticesStore } from "@wordpress/notices";
 
 // TODO: rename this
 function MyFirstApp() {
@@ -33,6 +34,7 @@ function MyFirstApp() {
   // the markup
   return (
     <div>
+      <Notifications />
       <div className="list-controls">
         <SearchControl onChange={setSearchTerm} value={searchTerm} />
         <CreatePageButton />
@@ -41,6 +43,64 @@ function MyFirstApp() {
     </div>
   );
 }
+
+function Notifications() {
+  const notices = useSelect((select) => select(noticesStore).getNotices(), []);
+
+  const { removeNotice } = useDispatch(noticesStore);
+  const snackbarNotices = notices.filter(({ type }) => type === "snackbar");
+
+  return (
+    <SnackbarList notices={snackbarNotices} className="components-editor-notices_snackbar" onRemove={removeNotice} />
+  );
+}
+
+const DeletePageButton = ({ pageId }) => {
+
+  const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
+
+  const { getLastEntityDeleteError } = useSelect(coreDataStore);
+
+  const handleDelete = async () => {
+    const success = await deleteEntityRecord("postType", "page", pageId);
+
+    if (success) {
+      createSuccessNotice("The page was deleted", {
+        type: "snackbar",
+      });
+    } else {
+      const lastError = getLastEntityDeleteError("postType", "page", pageId);
+      const message = (lastError?.message || "There was an error") + " Please refresh the page and try again.";
+
+      createErrorNotice(message, {
+        type: "snackbar",
+      });
+    }
+  };
+
+  const { deleteEntityRecord } = useDispatch(coreDataStore);
+  const { isDeleting } = useSelect(
+    (select) => ({
+      isDeleting: select(coreDataStore).isDeletingEntityRecord("postType", "page", pageId),
+    }),
+    [pageId]
+  );
+
+  // error checking
+
+  return (
+    <Button variant="primary" onClick={handleDelete} disabled={isDeleting}>
+      {isDeleting ? (
+        <>
+          <Spinner />
+          Dleting...
+        </>
+      ) : (
+        "Delete"
+      )}
+    </Button>
+  );
+};
 
 function CreatePageButton() {
   const [isOpen, setOpen] = useState(false);
@@ -78,10 +138,9 @@ function CreatePageForm({ onSaveFinished, onCancel }) {
     const savedRecord = await saveEntityRecord("postType", "page", { title, status: "publish" });
 
     if (savedRecord) {
-    onSaveFinished();
+      onSaveFinished();
     }
   };
-
 
   return (
     <PageForm
@@ -165,7 +224,7 @@ export function PageForm({ title, onChangeTitle, hasEdits, lastError, isSaving, 
   );
 }
 
-function PageEditButton({ pageId }) {
+function EditPageButton({ pageId }) {
   const [isOpen, setOpen] = useState(false);
   const openModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
@@ -184,6 +243,7 @@ function PageEditButton({ pageId }) {
   );
 }
 
+// TODO: offer as a sacrifice
 function PageList({ hasResolved, pages }) {
   if (!hasResolved) {
     return <Spinner />;
@@ -206,7 +266,10 @@ function PageList({ hasResolved, pages }) {
           <tr key={page.id}>
             <td>{decodeEntities(page.title.rendered)}</td>
             <td>
-              <PageEditButton pageId={page.id} />
+              <div className="form-buttons rocky">
+                <EditPageButton pageId={page.id} />
+                <DeletePageButton pageId={page.id} />
+              </div>
             </td>
           </tr>
         ))}

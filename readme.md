@@ -14,7 +14,7 @@ Setting up the environment -
 
 Retrieving WP data records
 
-* Using the `wp.data` object in devtools
+* Using the `wp.data.xxxxxx('core')` object in devtools [core-data](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-core-data/)
 * Retrieving data from the WP store `@wordpress/core-data`, versus the API
 * Using `@wordpress/components` like the search bar, the spinner
 * Using `getEntityRecord` within the `wp.data.select('core')` data object.
@@ -29,6 +29,12 @@ Editing the WP data records
 Creating new WP data records
 
 * Using React `useState` for any brand new records (as opposed to editNewEntryRecord)
+* Using `wp.data.dispatch('core').saveEntityRecord` to create new pages
+
+Delete WP data records
+* Using `wp.data.dispatch('core').isDeletingEntityRecord` for deleting pages
+* Using `getLastEntityDeleteError` to for error checking
+* Using the [Snackbar](https://wordpress.github.io/gutenberg/?path=/story/components-snackbar--default)
 
 ## Notes
 
